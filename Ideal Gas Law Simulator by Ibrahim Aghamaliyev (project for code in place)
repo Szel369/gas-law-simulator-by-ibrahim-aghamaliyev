@@ -1,0 +1,96 @@
+import pygame
+import random
+import math
+
+# --- 1. User Setup Phase ---
+print("--- Ideal Gas Law Simulator by Ibrahim Aghamaliyev (project for Code in place) ---")
+try:
+    n_particles = int(input("Enter number of particles (n): "))
+    temp_k = float(input("Enter Temperature (T) in Kelvin: "))
+except ValueError:
+    n_particles = 200
+    temp_k = 300
+
+# --- 2. Configuration ---
+WIDTH, HEIGHT = 800, 600
+R = 8.314  # Gas constant
+# Speed factor based on root-mean-square speed principles
+speed_factor = math.sqrt(temp_k) / 10
+piston_y = 200
+
+
+class Particle:
+    def __init__(self, start_y):
+        self.x = random.randint(55, 745)
+        self.y = random.randint(start_y + 10, 590)
+        self.vx = random.uniform(-speed_factor, speed_factor)
+        self.vy = random.uniform(-speed_factor, speed_factor)
+
+    def move(self, piston_y):
+        self.x += self.vx
+        self.y += self.vy
+        # Wall bounces
+        if self.x < 50 or self.x > 750: self.vx *= -1
+        if self.y > 595: self.vy *= -1
+        # Piston bounce
+        if self.y < piston_y:
+            self.y = piston_y + 5
+            self.vy *= -1
+
+
+# --- 3. Pygame Setup ---
+pygame.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+font = pygame.font.SysFont("Arial", 20)
+particles = [Particle(piston_y) for _ in range(n_particles)]
+
+running = True
+clock = pygame.time.Clock()
+
+# --- 4. Main Loop ---
+while running:
+    screen.fill((20, 20, 20))
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT: running = False
+
+    # Input handling
+    keys = pygame.key.get_pressed()
+    # Piston controls: Up/Down to move the piston
+    if keys[pygame.K_UP] and piston_y > 50: piston_y -= 2
+    if keys[pygame.K_DOWN] and piston_y < 550:
+        piston_y += 2
+        # Keep particles below piston
+        for p in particles:
+            if p.y < piston_y:
+                p.y = piston_y + 5
+
+    # Drawing
+    pygame.draw.rect(screen, (255, 255, 255), (50, 50, 700, 550), 2)  # Container
+    pygame.draw.rect(screen, (150, 150, 150), (50, piston_y, 700, 5))  # Piston
+    for p in particles:
+        p.move(piston_y)
+        pygame.draw.circle(screen, (0, 150, 255), (int(p.x), int(p.y)), 3)
+
+    # Metrics Calculations
+    vol_liters = (600 - piston_y) / 5.0
+    vol_m3 = vol_liters / 1000.0
+    pressure_pa = (n_particles * R * temp_k) / (vol_m3 + 0.0001)
+    pressure_kpa = pressure_pa / 1000.0
+
+    # Text display
+    display_text = [
+        f"Particles (n): {n_particles} moles",
+        f"Temperature (T): {temp_k:.1f} K",
+        f"Volume (V): {vol_liters:.2f} L ({vol_m3:.4f} m3)",
+        f"Pressure (P): {pressure_kpa:.2f} kPa",
+        "",
+        "Controls: UP/DOWN arrows move piston"
+    ]
+
+    for i, line in enumerate(display_text):
+        screen.blit(font.render(line, True, (255, 255, 255)), (60, 60 + (i * 30)))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
