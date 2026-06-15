@@ -1,1 +1,3 @@
 # gas-law-simulator-by-ibrahim-aghamaliyev
+Ideal Gas Law SimulatorThis project is a Python-based physics simulation that visualizes the behavior of gas particles within a container, demonstrating the relationship described by the Ideal Gas Law (PV =nRT).
+FeaturesDynamic Simulation: Real-time calculation and visualization of gas particle kinetics.Interactive Control: Use the UP and DOWN arrow keys to move the piston and adjust the container volume (V) in real-time.Live Metrics: The dashboard calculates and displays:Moles (n): Amount of substance.Temperature (T): Kelvin (K).Volume (V): Displayed in both Liters (L) and cubic meters (m^3).Pressure (P): Calculated in Kilopascals (kPa) based on the current state.
